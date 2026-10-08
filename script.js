@@ -1,15 +1,16 @@
-$(document).ready(function () {
+document.addEventListener("DOMContentLoaded", function () {
     // Configuración del canvas
-    var canvas = $("#canvas")[0];
+    var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
-    var w = $("#canvas").width();
-    var h = $("#canvas").height();
+    var w = canvas.width;
+    var h = canvas.height;
 
     // Guardamos el ancho de la celda en una variable para fácil control
     var cw = 10;
     var d;
     var food;
     var score;
+    var game_loop;
 
     // Creamos la serpiente
     var snake_array; // Arreglo de celdas que forman la serpiente
@@ -130,13 +131,13 @@ $(document).ready(function () {
     }
 
     // Añadimos los controles del teclado
-    $(document).keydown(function (e) {
-        var key = e.which;
+    document.addEventListener("keydown", function (e) {
+        var key = e.which || e.keyCode;
         // Añadimos una condición para evitar el giro en dirección contraria
-        if (key == "37" && d != "right") d = "left";
-        else if (key == "38" && d != "down") d = "up";
-        else if (key == "39" && d != "left") d = "right";
-        else if (key == "40" && d != "up") d = "down";
+        if ((key == 37 || e.key === "ArrowLeft") && d != "right") d = "left";
+        else if ((key == 38 || e.key === "ArrowUp") && d != "down") d = "up";
+        else if ((key == 39 || e.key === "ArrowRight") && d != "left") d = "right";
+        else if ((key == 40 || e.key === "ArrowDown") && d != "up") d = "down";
         // La serpiente ahora se puede controlar mediante el teclado
-    })
-})
+    });
+});

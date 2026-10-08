@@ -1,6 +1,6 @@
 # 🐍 Juego de la Serpiente (Snake Game)
 
-Una implementación clásica del popular juego de la serpiente desarrollada con **HTML5 Canvas**, **CSS3** y **JavaScript** (jQuery).
+Una implementación clásica del popular juego de la serpiente desarrollada con **HTML5 Canvas**, **CSS3** y **JavaScript Vanilla** (sin dependencias).
 
 ---
 
@@ -31,8 +31,7 @@ Utiliza las flechas de dirección del teclado:
 
 - **HTML5**: Estructura semántica y renderizado con la API `<canvas>`.
 - **CSS3**: Diseño centrado y presentación del área de juego.
-- **JavaScript**: Lógica del juego, detección de colisiones y bucle de pintado a 60ms.
-- **jQuery (1.7.1)**: Manipulación del DOM y captura de eventos del teclado.
+- **JavaScript Vanilla**: Lógica del juego, eventos de teclado, detección de colisiones y bucle de pintado a 60ms sin librerías externas.
 
 ## 🚀 Cómo Ejecutar el Proyecto
 
