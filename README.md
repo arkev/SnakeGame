@@ -4,6 +4,12 @@ Una versión mejorada del legendario juego de la serpiente, renderizada dentro d
 
 Desarrollado con **HTML5 Canvas**, **CSS3 moderno** y **JavaScript Vanilla** (sin dependencias ni librerías externas).
 
+> 🌐 **Demo en Vivo / Versión Pública:**  
+> Puedes jugar directamente desde tu navegador en **GitHub Pages**:  
+> 👉 **[https://arkev.github.io/SnakeGame/](https://arkev.github.io/SnakeGame/)**  
+>  
+> *Nota: Esta rama (`gh-pages`) corresponde a la versión pública oficial lista para producción y alojada en GitHub Pages.*
+
 ---
 
 ## ✨ Características Principales
@@ -70,9 +76,14 @@ stateDiagram-v2
 
 ## 🚀 Cómo Ejecutar
 
+### En línea (Recomendado)
+Accede directamente a la versión pública en:  
+🔗 **[https://arkev.github.io/SnakeGame/](https://arkev.github.io/SnakeGame/)**
+
+### Localmente
 1. Clona o descarga el repositorio:
    ```bash
-   git clone https://github.com/arkev/SnakeGame.git
+   git clone -b gh-pages https://github.com/arkev/SnakeGame.git
    ```
 2. Abre `index.html` directamente en cualquier navegador web moderno (Chrome, Firefox, Safari, Edge) o utiliza un servidor local:
    ```bash
