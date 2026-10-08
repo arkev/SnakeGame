@@ -16,14 +16,25 @@ Desarrollado con **HTML5 Canvas**, **CSS3 moderno** y **JavaScript Vanilla** (si
 
 - **Diseño de Consola Retro**: Carcasa detallada con biseles, marco de pantalla LCD verdoso, cruceta direccional (D-pad), botones diagonales con iluminación retro y ranuras de altavoz.
 - **Máquina de Estados Completa**:
-  - `INICIO`: Pantalla de bienvenida interactiva con arte pixel y animación parpadeante.
-  - `JUGANDO`: Bucle de juego optimizado a 60 ms con marcador en tiempo real.
-  - `PAUSA`: Pausa instantánea manteniendo el estado actual de la partida.
-  - `GAME OVER`: Resumen de puntuación final con opción de reintentar o volver al menú.
-  - `CRÉDITOS`: Información técnica y autoría del proyecto (Desarrollado por **Arkev**).
+  - `INICIO`: Pantalla de bienvenida con arte pixel, animación parpadeante y `HI` con el mejor récord local.
+  - `JUGANDO`: Bucle de juego con velocidad progresiva y marcador `PUNTOS` en tiempo real.
+  - `PAUSA`: Pausa instantánea manteniendo velocidad y estado de la partida.
+  - `GAME_OVER`: Puntuación final, `TOP 5` local y acceso al registro si entraste al top.
+  - `REGISTRO`: Captura de 3 iniciales con teclado virtual (sin scroll).
+  - `CRÉDITOS`: Autoría del proyecto (Desarrollado por **Arkev**) + `TOP 5` con iniciales.
+- **Velocidad Progresiva**:
+  - Inicio en `150 ms` por paso (~6.67 pasos/s), es decir, 40% de la velocidad original de `60 ms`.
+  - Cada 5 puntos: `+5%` de velocidad compuesta (`intervalo = 150 / 1.05^nivel`, `nivel = floor(puntos/5)`), sin tope.
+  - La velocidad original (~60 ms) se alcanza alrededor del nivel 19 (95 puntos).
+  - Cada partida reinicia a `150 ms`; pausar/reanudar conserva la velocidad.
+- **Récords Locales sin Base de Datos (Top 5)**:
+  - Guardado en `localStorage` (`snakegame_top5_v1`) como `[{nombre:"ABC", puntos:12}]`. Persiste por navegador/dispositivo.
+  - Migra récords viejos en formato número a `{nombre:"---", puntos:N}`.
+  - Solo entra si `puntos > 0` y supera al 5to lugar (el empate no desplaza).
 - **Doble Esquema de Control**:
-  - **Físico / Táctil**: Cruceta direccional y botones interactivos compatibles con pantallas táctiles (móviles/tablets) y clics de ratón.
-  - **Teclado**: Flechas de dirección o teclas `W`, `A`, `S`, `D`, más `Enter`/`Espacio` y `Escape`.
+  - **Físico / Táctil**: Cruceta direccional y botones `START`/`BACK` compatibles con touch y mouse. En `REGISTRO`, D-pad ◀/▶ mueve el cursor.
+  - **Teclado virtual**: A-Z + Ñ + ⌫ dentro de la pantalla, compacto y sin scroll, especial para celular.
+  - **Teclado físico**: Flechas o `W`, `A`, `S`, `D`, más `Enter`/`Espacio` y `Escape`. En `REGISTRO`, letras/números escriben, `Backspace` borra, `Enter` guarda y `Escape` sale.
 - **Prevención de Suicidio / Auto-Giro**: Sistema de cola de entrada que impide colisiones accidentales al presionar giros rápidos contrarios.
 - **Optimizado para Móviles y Web App**: 
   - Meta tags para pantalla completa (`apple-mobile-web-app-capable`).
@@ -42,8 +53,14 @@ Desarrollado con **HTML5 Canvas**, **CSS3 moderno** y **JavaScript Vanilla** (si
 | **Mover Abajo** | Cruceta ▼ | `▼ Flecha Abajo` / `S` |
 | **Mover Izquierda** | Cruceta ◀ | `◀ Flecha Izquierda` / `A` |
 | **Mover Derecha** | Cruceta ▶ | `▶ Flecha Derecha` / `D` |
-| **Iniciar / Pausar / Reintentar** | Botón Verde (`START`) | `Enter` / `Espacio` |
-| **Volver / Salir / Créditos** | Botón Rojo (`BACK`) | `Escape` / `Backspace` |
+| **Iniciar / Pausar / Reanudar** | Botón Verde (`START`) | `Enter` / `Espacio` |
+| **Reintentar (sin récord)** | Botón Verde (`START`) en `GAME_OVER` | `Enter` / `Espacio` |
+| **Registrar récord** | Botón Verde (`START`) en `GAME_OVER` → `REGISTRO` | `Enter` en `GAME_OVER` |
+| **Guardar iniciales** | `START: GUARDAR` (físico o en pantalla) | `Enter` (requiere 3 iniciales) |
+| **Salir / Cancelar registro** | Botón Rojo (`BACK`, descarta sin guardar) | `Escape` (en `REGISTRO` también `Backspace` borra) |
+| **Escribir iniciales** | Teclado virtual A-Z + Ñ + ⌫ (tocar letras/casillas) | Letras `A-Z`, `Ñ`, `0-9` |
+| **Mover cursor (registro)** | Cruceta ◀ / ▶ | `◀` / `▶` |
+| **Volver / Salir / Créditos** | Botón Rojo (`BACK`) | `Escape` / `Backspace` (fuera de `REGISTRO`) |
 
 ---
 
@@ -54,14 +71,19 @@ stateDiagram-v2
     [*] --> INICIO
     INICIO --> JUGANDO : START (Verde) / Enter
     INICIO --> CREDITOS : BACK (Rojo) / Escape
-    CREDITOS --> INICIO : BACK (Rojo) / Escape
+    CREDITOS --> INICIO : BACK (Rojo) / Escape / START
     JUGANDO --> PAUSA : START (Verde) / Enter
     PAUSA --> JUGANDO : START (Verde) / Enter
     PAUSA --> INICIO : BACK (Rojo) / Escape
     JUGANDO --> GAME_OVER : Colisión
-    GAME_OVER --> JUGANDO : START (Verde) / Enter
+    GAME_OVER --> REGISTRO : START si hay récord Top 5
+    GAME_OVER --> JUGANDO : START (Verde) / Enter sin récord
     GAME_OVER --> INICIO : BACK (Rojo) / Escape
+    REGISTRO --> CREDITOS : START Guardar 3 iniciales
+    REGISTRO --> INICIO : BACK descartar
 ```
+
+> **Notas de flujo:** `BACK` en `REGISTRO` descarta las iniciales y no guarda. `START` en `REGISTRO` solo guarda con las 3 iniciales completas y muestra el `TOP 5` en `CRÉDITOS`.
 
 ---
 
@@ -69,8 +91,16 @@ stateDiagram-v2
 
 - **HTML5**: Estructura semántica, accesibilidad ARIA, metaetiquetas para Web App móvil y renderizado gráfico mediante `<canvas>` (450×450 píxeles nativos).
 - **CSS3**: Diseño retro realista mediante degradados, sombras multicapa, CSS Grid para la cruceta y consultas de medios responsive.
-- **JavaScript Vanilla**: Lógica de máquina de estados, manejo de eventos pointer (táctiles y mouse), gestión de colisiones y bucle de juego.
+- **JavaScript Vanilla**: Lógica de máquina de estados (`INICIO/JUGANDO/PAUSA/GAME_OVER/REGISTRO/CREDITOS`), velocidad progresiva, récords en `localStorage`, teclado virtual, manejo de eventos pointer (táctiles y mouse), gestión de colisiones y bucle de juego.
 - **Google Fonts**: Tipografía pixelada estilo 8-bit (*Press Start 2P*).
+
+---
+
+## 🏆 Récords
+
+- El `TOP 5` vive solo en el navegador (`localStorage`, sin servidor).
+- Formato: `[{ "nombre": "ABC", "puntos": 12 }]`.
+- Limitaciones: no es global (cada celular/navegador tiene su top), se borra al limpiar datos del sitio y es editable desde DevTools.
 
 ---
 
@@ -105,9 +135,9 @@ SnakeGame/
 │   ├── consola.svg       # Arte vectorial original de la consola
 │   ├── favicon.png       # Favicon del sitio
 │   └── snakeGame.png     # Icono de la aplicación para dispositivos móviles
-├── index.html            # Estructura de la consola, canvas, meta tags e iconos
-├── style.css             # Estilos de la carcasa, pantalla, cruceta y responsive
-├── script.js             # Máquina de estados, lógica del juego, controles y canvas
+├── index.html            # Estructura de la consola, canvas, overlay de registro + teclado virtual, meta tags e iconos
+├── style.css             # Estilos de la carcasa, pantalla, cruceta, registro compacto sin scroll y responsive
+├── script.js             # Máquina de estados, velocidad progresiva, Top 5 localStorage, registro de iniciales y canvas
 └── README.md             # Documentación completa del proyecto
 ```
 
