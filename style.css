@@ -1,15 +1,398 @@
+/* ==========================================================================
+   Consola Retro Snake Game - Estilos Visuales
+   Inspirado en estética Game Boy / Nokia clásica
+   ========================================================================== */
+
+:root {
+    --bg-page: #18191c;
+    --consola-cuerpo: #3c3e43;
+    --consola-cuerpo-sombra: #2b2c30;
+    --consola-borde: #26272a;
+    --pantalla-marco: #242528;
+    --pantalla-bisel: #7a7e85;
+    --pantalla-fondo: #9fb87a;
+    --pantalla-pixel: #040207;
+    --dpad-color: #1e1f23;
+    --dpad-detalle: #3d3f46;
+    --btn-cuerpo: #1e1f23;
+    --btn-verde: #2ecc71;
+    --btn-verde-glow: rgba(46, 204, 113, 0.4);
+    --btn-rojo: #e74c3c;
+    --btn-rojo-glow: rgba(231, 76, 60, 0.4);
+    --texto-etiqueta: #787d88;
+    --font-retro: 'Press Start 2P', 'Courier New', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background-color: var(--bg-page);
+    background-image: 
+        radial-gradient(circle at 50% 20%, #262830 0%, #151619 100%);
+    font-family: var(--font-retro);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
 body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
+    padding: 16px;
 }
 
-canvas {
-    border: 2px solid #000;
-    margin: 16px auto;
+/* --------------------------------------------------------------------------
+   Contenedor Principal
+   -------------------------------------------------------------------------- */
+.consola-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 420px;
+}
+
+/* --------------------------------------------------------------------------
+   Carcasa de la Consola
+   -------------------------------------------------------------------------- */
+.consola {
+    width: 100%;
+    background: linear-gradient(175deg, #44474e 0%, var(--consola-cuerpo) 40%, #34363a 100%);
+    border: 3px solid var(--consola-borde);
+    border-radius: 42px 42px 48px 48px;
+    padding: 24px 20px 28px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.7),
+        0 8px 16px rgba(0, 0, 0, 0.4),
+        inset 0 2px 3px rgba(255, 255, 255, 0.12),
+        inset 0 -4px 6px rgba(0, 0, 0, 0.5);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Marco y Pantalla Retro
+   -------------------------------------------------------------------------- */
+.consola__pantalla-marco {
+    background: var(--pantalla-marco);
+    border-radius: 20px;
+    padding: 12px;
+    border: 3px solid var(--pantalla-bisel);
+    box-shadow: 
+        inset 0 3px 6px rgba(0, 0, 0, 0.6),
+        0 2px 4px rgba(255, 255, 255, 0.08);
+    position: relative;
+}
+
+.consola__pantalla-cristal {
+    background-color: var(--pantalla-fondo);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Efecto sutil de cristal / líneas scanline retro */
+.consola__pantalla-cristal::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        rgba(255, 255, 255, 0.04) 50%, 
+        rgba(0, 0, 0, 0.04) 50%
+    );
+    background-size: 100% 4px;
+    border-radius: 10px;
+}
+
+#canvas {
     display: block;
-    background-color: #fff;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background-color: var(--pantalla-fondo);
+}
+
+/* --------------------------------------------------------------------------
+   Zona de Controles
+   -------------------------------------------------------------------------- */
+.consola__controles {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Cruceta Direccional (D-Pad)
+   -------------------------------------------------------------------------- */
+.dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    grid-template-rows: repeat(3, 40px);
+    position: relative;
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45));
+}
+
+.dpad__btn {
+    background-color: var(--dpad-color);
+    border: none;
+    outline: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background-color 0.1s, transform 0.08s;
+    position: relative;
+}
+
+.dpad__flecha {
+    color: var(--dpad-detalle);
+    font-size: 12px;
+    line-height: 1;
+    pointer-events: none;
+    transition: color 0.1s;
+}
+
+.dpad__arriba {
+    grid-column: 2;
+    grid-row: 1;
+    border-radius: 8px 8px 0 0;
+    box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.12);
+}
+
+.dpad__izquierda {
+    grid-column: 1;
+    grid-row: 2;
+    border-radius: 8px 0 0 8px;
+    box-shadow: inset 2px 0 2px rgba(255, 255, 255, 0.12);
+}
+
+.dpad__centro {
+    grid-column: 2;
+    grid-row: 2;
+    background-color: var(--dpad-color);
+    position: relative;
+}
+
+/* Pequeña muesca central de la cruceta */
+.dpad__centro::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, #161719 40%, #26272c 100%);
+    border-radius: 50%;
+}
+
+.dpad__derecha {
+    grid-column: 3;
+    grid-row: 2;
+    border-radius: 0 8px 8px 0;
+    box-shadow: inset -2px 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.dpad__abajo {
+    grid-column: 2;
+    grid-row: 3;
+    border-radius: 0 0 8px 8px;
+    box-shadow: inset 0 -2px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Efecto al presionar la cruceta */
+.dpad__btn:active,
+.dpad__btn.dpad__btn--activo {
+    background-color: #121316;
+}
+
+.dpad__btn:active .dpad__flecha,
+.dpad__btn.dpad__btn--activo .dpad__flecha {
+    color: #8b8f98;
+}
+
+/* --------------------------------------------------------------------------
+   Botones de Acción (Rojo y Verde Diagonales)
+   -------------------------------------------------------------------------- */
+.botones-accion {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-right: 6px;
+}
+
+.btn-grupo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Orientación diagonal: Rojo abajo-izquierda, Verde arriba-derecha */
+.btn-grupo--rojo {
+    margin-top: 24px;
+}
+
+.btn-grupo--verde {
+    margin-bottom: 24px;
+}
+
+.btn-circular {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #28292d, #191a1d);
+    border: 2px solid #141518;
+    cursor: pointer;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 
+        0 6px 12px rgba(0, 0, 0, 0.55),
+        inset 0 1px 2px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.btn-circular:active,
+.btn-circular.btn--activo {
+    transform: translateY(3px) scale(0.96);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.6),
+        inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Píldora/barra de color en el centro del botón */
+.btn-barra {
+    width: 18px;
+    height: 4px;
+    border-radius: 2px;
+    display: block;
+    pointer-events: none;
+}
+
+.btn-barra--verde {
+    background-color: var(--btn-verde);
+    box-shadow: 0 0 6px var(--btn-verde-glow);
+}
+
+.btn-barra--roja {
+    background-color: var(--btn-rojo);
+    box-shadow: 0 0 6px var(--btn-rojo-glow);
+}
+
+.btn-etiqueta {
+    font-size: 8px;
+    letter-spacing: 0.5px;
+    color: var(--texto-etiqueta);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Altavoz Decorativo
+   -------------------------------------------------------------------------- */
+.consola__altavoz {
+    display: flex;
+    gap: 6px;
+    align-self: flex-end;
+    margin-right: 14px;
+    margin-top: -6px;
+}
+
+.consola__altavoz-ranura {
+    width: 6px;
+    height: 28px;
+    background-color: #212225;
+    border-radius: 3px;
+    box-shadow: 
+        inset 0 1px 2px rgba(0, 0, 0, 0.8),
+        0 1px 1px rgba(255, 255, 255, 0.08);
+    transform: rotate(20deg);
+}
+
+/* --------------------------------------------------------------------------
+   Ajustes Responsivos para Pantallas Pequeñas y Móviles
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .consola {
+        padding: 18px 14px 22px;
+        border-radius: 32px 32px 38px 38px;
+        gap: 16px;
+    }
+
+    .consola__pantalla-marco {
+        padding: 8px;
+        border-width: 2px;
+    }
+
+    .dpad {
+        grid-template-columns: repeat(3, 36px);
+        grid-template-rows: repeat(3, 36px);
+    }
+
+    .btn-circular {
+        width: 44px;
+        height: 44px;
+    }
+
+    .botones-accion {
+        gap: 14px;
+    }
+}
+
+@media (max-height: 700px) and (orientation: landscape) {
+    body {
+        padding: 6px;
+    }
+
+    .consola {
+        max-width: 340px;
+        padding: 12px 12px 16px;
+        gap: 10px;
+    }
+
+    .dpad {
+        grid-template-columns: repeat(3, 32px);
+        grid-template-rows: repeat(3, 32px);
+    }
+
+    .btn-circular {
+        width: 38px;
+        height: 38px;
+    }
 }
