@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Subtítulo de créditos
         ctx.font = '10px "Press Start 2P", "Courier New", monospace';
         ctx.fillStyle = "#3a4628";
-        ctx.fillText("BACK: CREDITOS", w / 2, 390);
+        ctx.fillText("BACK: CRÉDITOS", w / 2, 390);
     }
 
     function dibujarSerpienteDecorativa() {
@@ -192,7 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         ctx.font = '11px "Press Start 2P", "Courier New", monospace';
         ctx.fillText("START: REANUDAR", w / 2, 255);
-        ctx.fillText("BACK: SALIR AL MENU", w / 2, 273);
+        ctx.fillText("BACK: SALIR AL MENÚ", w / 2, 273);
     }
 
     function dibujarGameOver() {
@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         ctx.font = '10px "Press Start 2P", "Courier New", monospace';
         ctx.fillStyle = "#3a4628";
-        ctx.fillText("BACK: MENU PRINCIPAL", w / 2, 360);
+        ctx.fillText("BACK: MENÚ PRINCIPAL", w / 2, 360);
     }
 
     function dibujarCreditos() {
@@ -232,31 +232,36 @@ document.addEventListener("DOMContentLoaded", function () {
         ctx.fillStyle = "#040207";
         ctx.textAlign = "center";
         ctx.font = 'bold 22px "Press Start 2P", "Courier New", monospace';
-        ctx.fillText("CREDITOS", w / 2, 80);
+        ctx.fillText("CRÉDITOS", w / 2, 75);
 
         ctx.lineWidth = 2;
         ctx.strokeStyle = "#040207";
         ctx.beginPath();
-        ctx.moveTo(70, 105);
-        ctx.lineTo(380, 105);
+        ctx.moveTo(70, 95);
+        ctx.lineTo(380, 95);
         ctx.stroke();
 
         ctx.font = '11px "Press Start 2P", "Courier New", monospace';
-        ctx.fillText("SNAKE GAME RETRO", w / 2, 155);
+        ctx.fillText("SNAKE GAME RETRO", w / 2, 135);
 
+        // Crédito explícito al autor Arkev
         ctx.font = '9px "Press Start 2P", "Courier New", monospace';
         ctx.fillStyle = "#222a18";
-        ctx.fillText("DESARROLLADO CON:", w / 2, 205);
-        ctx.fillText("HTML5 CANVAS + JS VANILLA", w / 2, 230);
-        ctx.fillText("ESTETICA GAME BOY & NOKIA", w / 2, 255);
+        ctx.fillText("DESARROLLADO POR:", w / 2, 180);
 
         ctx.fillStyle = "#040207";
-        ctx.font = '9px "Press Start 2P", "Courier New", monospace';
-        ctx.fillText("CONTROLES: TECLADO Y TOUCH", w / 2, 310);
+        ctx.font = 'bold 15px "Press Start 2P", "Courier New", monospace';
+        ctx.fillText("ARKEV", w / 2, 210);
+
+        ctx.font = '8px "Press Start 2P", "Courier New", monospace';
+        ctx.fillStyle = "#222a18";
+        ctx.fillText("HTML5 CANVAS + JS VANILLA", w / 2, 258);
+        ctx.fillText("ESTÉTICA GAME BOY & NOKIA", w / 2, 280);
+        ctx.fillText("CONTROLES: TECLADO Y TOUCH", w / 2, 302);
 
         ctx.fillStyle = "#3a4628";
-        ctx.font = '11px "Press Start 2P", "Courier New", monospace';
-        ctx.fillText("PRESIONA BACK", w / 2, 390);
+        ctx.font = '10px "Press Start 2P", "Courier New", monospace';
+        ctx.fillText("PRESIONA BACK", w / 2, 385);
     }
 
     // =========================================================================

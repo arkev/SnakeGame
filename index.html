@@ -3,12 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="SnakeGame">
+    <meta name="description" content="videojuego basado en el clásico juego de Nokia, Snake Game">
     <title>Snake Game - Consola Retro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="images/snakeGame.png">
+    <link rel="apple-touch-icon" href="images/snakeGame.png">
+    <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
 </head>
 
 <body>
@@ -28,11 +36,13 @@
                     <button type="button" class="dpad__btn dpad__arriba" data-dir="up" aria-label="Mover arriba">
                         <span class="dpad__flecha">▲</span>
                     </button>
-                    <button type="button" class="dpad__btn dpad__izquierda" data-dir="left" aria-label="Mover a la izquierda">
+                    <button type="button" class="dpad__btn dpad__izquierda" data-dir="left"
+                        aria-label="Mover a la izquierda">
                         <span class="dpad__flecha">◀</span>
                     </button>
                     <div class="dpad__centro" aria-hidden="true"></div>
-                    <button type="button" class="dpad__btn dpad__derecha" data-dir="right" aria-label="Mover a la derecha">
+                    <button type="button" class="dpad__btn dpad__derecha" data-dir="right"
+                        aria-label="Mover a la derecha">
                         <span class="dpad__flecha">▶</span>
                     </button>
                     <button type="button" class="dpad__btn dpad__abajo" data-dir="down" aria-label="Mover abajo">
@@ -44,7 +54,8 @@
                 <div class="botones-accion" role="group" aria-label="Botones de acción">
                     <!-- Botón Rojo (Volver / Créditos) - Inferior izquierda -->
                     <div class="btn-grupo btn-grupo--rojo">
-                        <button type="button" class="btn-circular btn-rojo" id="btn-back" aria-label="Botón Rojo: Volver o Créditos">
+                        <button type="button" class="btn-circular btn-rojo" id="btn-back"
+                            aria-label="Botón Rojo: Volver o Créditos">
                             <span class="btn-barra btn-barra--roja"></span>
                         </button>
                         <span class="btn-etiqueta">BACK</span>
@@ -52,7 +63,8 @@
 
                     <!-- Botón Verde (Iniciar / Pausar) - Superior derecha -->
                     <div class="btn-grupo btn-grupo--verde">
-                        <button type="button" class="btn-circular btn-verde" id="btn-start" aria-label="Botón Verde: Iniciar o Pausar">
+                        <button type="button" class="btn-circular btn-verde" id="btn-start"
+                            aria-label="Botón Verde: Iniciar o Pausar">
                             <span class="btn-barra btn-barra--verde"></span>
                         </button>
                         <span class="btn-etiqueta">START</span>
