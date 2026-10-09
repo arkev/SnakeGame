@@ -135,11 +135,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- ZzFXMicro v1.4.0 by Frank Force (MIT, https://github.com/KilledByAPixel/ZzFX) ---
     // Motor tiny que convierte arrays de números (tus TXT) en sonido 8-bit. No tocar.
     var zzfxV = 0.3;
+    // OJO iOS: el contexto NO se crea al cargar, sino dentro del primer gesto
+    // (tap/tecla). Un contexto nacido antes del gesto queda suspendido para siempre en iOS.
     var zzfxX = null;
-    try {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        if (AC) zzfxX = new AC();
-    } catch (e) { zzfxX = null; }
+    function crearContextoSiFalta() {
+        if (zzfxX) return zzfxX;
+        try {
+            var AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) zzfxX = new AC();
+            else if (typeof audioAnotarError === "function") audioAnotarError("sin AudioContext ni webkit");
+        } catch (e) {
+            zzfxX = null;
+            if (typeof audioAnotarError === "function") audioAnotarError("crear ctx: " + (e && e.message || e));
+        }
+        return zzfxX;
+    }
     var zzfx = function (p, k, b, e, r, t, q, D, u, y, v, z, l, E, A, F, c, w, m, B, N) {
         if (!zzfxX) return;
         if (p === undefined) p = 1; if (k === undefined) k = 0.05; if (b === undefined) b = 220;
@@ -153,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
             g = 0, H = 0, a = 0, n = 1, I = 0, J = 0, f = 0, h = N < 0 ? -1 : 1, x = d * h * N * 2 / R, L = M.cos(x), Z = M.sin,
             K = Z(x) / 4, O = 1 + K, X = -2 * L / O, Y = (1 - K) / O, P = (1 + h * L) / 2 / O, Q = -(h + L) / O, S = P, T = 0, U = 0, V = 0, W = 0;
         e = R * e + 9; m *= R; r *= R; t *= R; c *= R; y *= 500 * d / R / R / R; A *= d / R; v *= d / R; z *= R; l = R * l | 0; p *= zzfxV;
-        for (h = e + m + r + t + c | 0; a < h; k[a++] = f * p)++J % (100 * F | 0) || (f = q ? 1 < q ? 2 < q ? 3 < q ? 4 < q ? (g / d % 1 < D / 2) * 2 - 1 : Z(g * g * g) : M.max(M.min(M.tan(g), 1), -1) : 1 - (2 * g / d % 2 + 2) % 2 : 1 - 4 * M.abs(M.round(g / d) - g / d) : Z(g), f = (l ? 1 - B + B * Z(d * a / l) : 1) * (4 < q ? f : (f < 0 ? -1 : 1) * M.abs(f) * M.abs(f) ** D) * (a < e ? a / e : a < e + m ? 1 - (a - e) / m * (1 - w) : a < e + m + r ? w : a < h - c ? (h - a - c) / t * w : 0), f = c ? f / 2 + (c > a ? 0 : (a < h - c ? 1 : (h - a) / c) * k[a - c | 0] / 2 / p) : f, N ? f = W = S * T + Q * (T = U) + P * (U = f) - Y * V - X * (V = W) : 0), x = (b += u += y) * M.cos(A * H++), g += x + x * E * (a * a * d % 2 - 1), n && ++n > z && (b += v, C += v, n = 0), !l || ++I % l || (b = C, u = G, n = n || 1);
+        for (h = e + m + r + t + c | 0; a < h; k[a++] = f * p)++J % (100 * F | 0) || (f = q ? 1 < q ? 2 < q ? 3 < q ? 4 < q ? (g / d % 1 < D / 2) * 2 - 1 : Z(g * g * g) : M.max(M.min(M.tan(g), 1), -1) : 1 - (2 * g / d % 2 + 2) % 2 : 1 - 4 * M.abs(M.round(g / d) - g / d) : Z(g), f = (l ? 1 - B + B * Z(d * a / l) : 1) * (4 < q ? f : (f < 0 ? -1 : 1) * M.pow(M.abs(f), D)) * (a < e ? a / e : a < e + m ? 1 - (a - e) / m * (1 - w) : a < e + m + r ? w : a < h - c ? (h - a - c) / t * w : 0), f = c ? f / 2 + (c > a ? 0 : (a < h - c ? 1 : (h - a) / c) * k[a - c | 0] / 2 / p) : f, N ? f = W = S * T + Q * (T = U) + P * (U = f) - Y * V - X * (V = W) : 0), x = (b += u += y) * M.cos(A * H++), g += x + x * E * (a * a * d % 2 - 1), n && ++n > z && (b += v, C += v, n = 0), !l || ++I % l || (b = C, u = G, n = n || 1);
         X = zzfxX; p = X.createBuffer(1, h, R); p.getChannelData(0).set(k); b = X.createBufferSource(); b.buffer = p; b.connect(X.destination); b.start();
     };
 
@@ -189,19 +199,26 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     function desbloquearAudio() {
+        crearContextoSiFalta();
         try {
-            if (zzfxX && zzfxX.state === "suspended") zzfxX.resume();
-        } catch (e) { }
+            if (zzfxX && typeof zzfxX.state === "string" && zzfxX.state !== "running") {
+                var pr = zzfxX.resume();
+                if (pr && pr.catch) pr.catch(function () {});
+            }
+        } catch (e) {}
     }
 
     function reproducirSFX(nombre) {
         if (!sonidoActivado) return;
         var preset = SFX[nombre];
         if (!preset || !preset.length) return;
+        audioInfo.ultimoSFX = nombre;
         desbloquearAudio();
         try {
             zzfx.apply(null, preset);
-        } catch (e) { }
+        } catch (e) {
+            audioAnotarError("sfx " + nombre + ": " + (e && e.message || e));
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -257,11 +274,21 @@ document.addEventListener("DOMContentLoaded", function () {
             g.connect(zzfxX.destination);
             osc.start(t);
             osc.stop(t + dur);
-        } catch (e) { }
+            audioInfo.notas++;
+        } catch (e) {
+            audioAnotarError("nota: " + (e && e.message || e));
+        }
     }
 
     function programarPasoMusica() {
-        if (!musicaModo || !sonidoActivado || !zzfxX) return;
+        if (!musicaModo || !sonidoActivado) return;
+        if (!zzfxX || zzfxX.state !== "running") {
+            // Contexto aún no disponible (iOS antes del primer gesto):
+            // reintentar hasta que corra, sin programar notas mudas.
+            if (musicaTimer) clearTimeout(musicaTimer);
+            musicaTimer = setTimeout(programarPasoMusica, 300);
+            return;
+        }
         var esMenu = musicaModo === "menu";
         var lead = esMenu ? MUSICA.menuLead : MUSICA.juegoLead;
         var bass = esMenu ? MUSICA.menuBass : MUSICA.juegoBass;
@@ -287,7 +314,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!sonidoActivado) { musicaModo = modo; return; } // recuerda modo para reanudar al quitar mute
         musicaModo = modo;
         idxLead = 0; idxBass = 0; pasoContadorLead = 0; pasoContadorBass = 0;
-        desbloquearAudio();
+        // Sin desbloquearAudio aquí: al cargar no hay gesto aún (iOS) y el
+        // programador reintenta solo hasta que el contexto corra.
         programarPasoMusica();
     }
 
@@ -339,6 +367,46 @@ document.addEventListener("DOMContentLoaded", function () {
             reproducirSFX("ui");
             actualizarMusicaPorEstado();
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Diagnóstico de audio (?audio-debug en la URL). Solo para depurar en iOS:
+    // abre el juego como index.html?audio-debug, toca la pantalla y lee el recuadro.
+    // Muestra: gestos recibidos, estado del contexto, mute, música y último error.
+    // Para quitarlo, abre la URL normal sin el parámetro (no afecta el juego).
+    // -------------------------------------------------------------------------
+    var audioDebug = false;
+    try {
+        audioDebug = /audio-debug/.test(window.location.search || "");
+    } catch (e) { audioDebug = false; }
+    var audioInfo = { gestos: 0, ultimoSFX: "-", ultimoError: "-", notas: 0 };
+    function audioAnotarError(msg) {
+        audioInfo.ultimoError = String(msg).slice(0, 90);
+    }
+    var audioDebugEl = null;
+    if (audioDebug) {
+        try {
+            audioDebugEl = document.createElement("div");
+            audioDebugEl.id = "audio-debug";
+            audioDebugEl.setAttribute("style", "position:fixed;left:8px;bottom:8px;z-index:9999;max-width:92vw;background:rgba(0,0,0,0.85);color:#0f0;font:11px/1.5 monospace;white-space:pre-wrap;padding:8px 10px;border-radius:8px;pointer-events:none;");
+            audioDebugEl.textContent = "audio-debug...";
+            document.body.appendChild(audioDebugEl);
+            setInterval(function () {
+                if (!audioDebugEl) return;
+                var ctxEstado = zzfxX ? (zzfxX.state || "?") : "NULL (sin crear)";
+                var sr = "";
+                try { sr = zzfxX ? ", " + zzfxX.sampleRate + "Hz" : ""; } catch (e) {}
+                audioDebugEl.textContent =
+                    "ctx=" + ctxEstado + sr +
+                    " | mute=" + (sonidoActivado ? "OFF" : "ON") +
+                    " | musica=" + (musicaModo || "-") +
+                    (musicaTimer ? "(timer)" : "(sin timer)") +
+                    "\ngestos=" + audioInfo.gestos +
+                    " | sfx=" + audioInfo.ultimoSFX +
+                    " | notas=" + audioInfo.notas +
+                    "\nerr=" + audioInfo.ultimoError;
+            }, 500);
+        } catch (e) { audioDebugEl = null; }
     }
 
     // =========================================================================
@@ -1146,6 +1214,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // La música intenta arrancar desde el inicio; tras el primer tap/tecla suena sola,
     // sin necesidad de oprimir START. Si molesta, se apaga con el botón.
     function reanudarAudioTrasGesto() {
+        audioInfo.gestos++;
         desbloquearAudio();
         if (sonidoActivado && musicaModo && !musicaTimer) {
             var m = musicaModo;
@@ -1155,6 +1224,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     document.addEventListener("pointerdown", reanudarAudioTrasGesto, { passive: true });
     document.addEventListener("keydown", reanudarAudioTrasGesto);
+    document.addEventListener("touchstart", reanudarAudioTrasGesto, { passive: true });
     document.addEventListener("touchend", reanudarAudioTrasGesto, { passive: true });
 
     // Iniciar en la pantalla de bienvenida
