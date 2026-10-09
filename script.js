@@ -369,6 +369,39 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // =========================================================================
+    // Hápticos en botones (cruceta, START, BACK, Mute). NO en eventos del juego.
+    // A) navigator.vibrate (Android Chrome/Edge/Samsung). B) Hack experimental
+    // iOS 17.4+: alternar un switch invisible dispara el háptico del sistema
+    // (un solo pulso fijo, sin patrones). Si nada aplica, no hace nada.
+    // =========================================================================
+    var vibraSwitchEl = null;
+    function vibraSwitchIOS() {
+        try {
+            if (!vibraSwitchEl) {
+                vibraSwitchEl = document.createElement("input");
+                vibraSwitchEl.type = "checkbox";
+                vibraSwitchEl.setAttribute("switch", "");
+                vibraSwitchEl.setAttribute("aria-hidden", "true");
+                vibraSwitchEl.tabIndex = -1;
+                vibraSwitchEl.setAttribute("style", "position:fixed;top:0;left:0;width:4px;height:4px;opacity:0;pointer-events:none;");
+                document.body.appendChild(vibraSwitchEl);
+            }
+            vibraSwitchEl.click();
+        } catch (e) {}
+    }
+    function vibrar(patron) {
+        var conVibrate = false;
+        try {
+            conVibrate = ("vibrate" in navigator) && typeof navigator.vibrate === "function";
+        } catch (e) { conVibrate = false; }
+        if (conVibrate) {
+            try { navigator.vibrate(patron); } catch (e) {}
+        } else {
+            vibraSwitchIOS(); // fallback iOS, pulso simple experimental
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Diagnóstico de audio (?audio-debug en la URL). Solo para depurar en iOS:
     // abre el juego como index.html?audio-debug, toca la pantalla y lee el recuadro.
@@ -1020,6 +1053,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnStart.addEventListener("pointerdown", function (e) {
             e.preventDefault();
             btnStart.classList.add("btn--activo");
+            vibrar(15);
             accionBotonVerde();
         });
         btnStart.addEventListener("pointerup", function () {
@@ -1034,6 +1068,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnBack.addEventListener("pointerdown", function (e) {
             e.preventDefault();
             btnBack.classList.add("btn--activo");
+            vibrar(15);
             accionBotonRojo();
         });
         btnBack.addEventListener("pointerup", function () {
@@ -1050,6 +1085,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.addEventListener("pointerdown", function (e) {
             e.preventDefault();
             btn.classList.add("dpad__btn--activo");
+            vibrar(12);
             if (estado === "REGISTRO") {
                 if (dir === "left") moverCursor(-1);
                 else if (dir === "right") moverCursor(1);
@@ -1207,6 +1243,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (btnMute) {
         btnMute.addEventListener("click", function (e) {
             e.preventDefault();
+            vibrar(10);
             alternarMute();
         });
     }
