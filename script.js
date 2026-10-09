@@ -297,20 +297,31 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function actualizarMusicaPorEstado() {
-        if (!sonidoActivado) return;
         if (estado === "JUGANDO") {
             iniciarMusica("juego");
         } else if (estado === "PAUSA") {
             detenerMusica();
         } else {
-            // INICIO, GAME_OVER, REGISTRO, CREDITOS comparten loop de menú
+            // INICIO, GAME_OVER, REGISTRO, CREDITOS comparten loop de menú.
+            // Arranca desde el inicio (intento de autoplay; el navegador lo
+            // deja sonar tras el primer gesto del usuario).
             iniciarMusica("menu");
         }
     }
 
     function actualizarBotonMute() {
         if (!btnMute) return;
-        btnMute.textContent = sonidoActivado ? "🔊" : "🔇";
+        var icono = document.getElementById("mute-icon");
+        if (icono) {
+            icono.textContent = sonidoActivado ? "volume_up" : "volume_off";
+        } else {
+            btnMute.textContent = sonidoActivado ? "ON" : "OFF";
+        }
+        if (sonidoActivado) {
+            btnMute.classList.remove("btn-mute--off");
+        } else {
+            btnMute.classList.add("btn-mute--off");
+        }
         btnMute.setAttribute("aria-pressed", sonidoActivado ? "false" : "true");
         btnMute.setAttribute("aria-label", sonidoActivado ? "Silenciar sonido" : "Activar sonido");
     }
@@ -1122,24 +1133,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Botón Mute + desbloqueo de audio en el primer gesto (requisito móvil)
+    // Botón Mute: switch con un solo clic (no hay que mantenerlo).
+    // OJO: solo 'click', sin 'pointerdown', para no alternar dos veces por pulsación.
     actualizarBotonMute();
     if (btnMute) {
-        btnMute.addEventListener("pointerdown", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            desbloquearAudio();
-            alternarMute();
-        });
         btnMute.addEventListener("click", function (e) {
             e.preventDefault();
             alternarMute();
         });
     }
-    document.addEventListener("pointerdown", function desbloquearUnaVez() {
+    // Desbloqueo de audio en CUALQUIER gesto (el navegador exige uno antes de sonar).
+    // La música intenta arrancar desde el inicio; tras el primer tap/tecla suena sola,
+    // sin necesidad de oprimir START. Si molesta, se apaga con el botón.
+    function reanudarAudioTrasGesto() {
         desbloquearAudio();
-        if (sonidoActivado && !musicaModo) actualizarMusicaPorEstado();
-    }, { once: true });
+        if (sonidoActivado && musicaModo && !musicaTimer) {
+            var m = musicaModo;
+            musicaModo = null;
+            iniciarMusica(m);
+        }
+    }
+    document.addEventListener("pointerdown", reanudarAudioTrasGesto, { passive: true });
+    document.addEventListener("keydown", reanudarAudioTrasGesto);
+    document.addEventListener("touchend", reanudarAudioTrasGesto, { passive: true });
 
     // Iniciar en la pantalla de bienvenida
     cambiarEstado("INICIO");
