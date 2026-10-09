@@ -371,25 +371,80 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // =========================================================================
     // Hápticos en botones (cruceta, START, BACK, Mute). NO en eventos del juego.
-    // A) navigator.vibrate (Android Chrome/Edge/Samsung). B) Hack experimental
-    // iOS 17.4+: alternar un switch invisible dispara el háptico del sistema
-    // (un solo pulso fijo, sin patrones). Si nada aplica, no hace nada.
+    // A) navigator.vibrate (Android Chrome/Edge/Samsung).
+    // B) iOS (sin vibrate): hack del <label> con switch (iOS 17.4–26.4; Apple lo
+    //    cerró en 26.5) + un "clic" de audio cortito como respaldo para todos.
+    // Solo en pantallas táctiles: en escritorio no hace nada.
     // =========================================================================
-    var vibraSwitchEl = null;
+    var esTactil = false;
+    try {
+        esTactil = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+    } catch (e) { esTactil = false; }
+
+    // Hack iOS: hay que hacer click() en el LABEL (no en el input) para que
+    // iOS lo trate como toque real al switch y dispare el háptico del sistema.
+    var vibraLabelEl = null;
     function vibraSwitchIOS() {
         try {
-            if (!vibraSwitchEl) {
-                vibraSwitchEl = document.createElement("input");
-                vibraSwitchEl.type = "checkbox";
-                vibraSwitchEl.setAttribute("switch", "");
-                vibraSwitchEl.setAttribute("aria-hidden", "true");
-                vibraSwitchEl.tabIndex = -1;
-                vibraSwitchEl.setAttribute("style", "position:fixed;top:0;left:0;width:4px;height:4px;opacity:0;pointer-events:none;");
-                document.body.appendChild(vibraSwitchEl);
+            if (!vibraLabelEl) {
+                vibraLabelEl = document.createElement("label");
+                vibraLabelEl.setAttribute("aria-hidden", "true");
+                vibraLabelEl.setAttribute("style", "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;");
+                var input = document.createElement("input");
+                input.type = "checkbox";
+                input.setAttribute("switch", "");
+                input.tabIndex = -1;
+                vibraLabelEl.appendChild(input);
+                document.body.appendChild(vibraLabelEl);
             }
-            vibraSwitchEl.click();
+            vibraLabelEl.click();
         } catch (e) {}
     }
+
+    // iOS solo acepta el click simulado dentro de un gesto válido (pointerup /
+    // touchend / click; pointerdown táctil no cuenta). Si al llamar vibrar() aún
+    // no hay gesto activo (cruceta en pointerdown), se deja pendiente y se
+    // dispara al soltar el dedo.
+    var hapticoPendiente = false;
+    function hayGestoActivo() {
+        try {
+            if (navigator.userActivation) return navigator.userActivation.isActive;
+        } catch (e) {}
+        return false;
+    }
+    function dispararHapticoPendiente() {
+        if (!hapticoPendiente) return;
+        hapticoPendiente = false;
+        vibraSwitchIOS();
+    }
+    document.addEventListener("pointerup", dispararHapticoPendiente, true);
+    document.addEventListener("touchend", dispararHapticoPendiente, true);
+    document.addEventListener("pointercancel", function () { hapticoPendiente = false; }, true);
+
+    // Respaldo audible: "tic" grave de ~20 ms que se siente como un clic físico.
+    // Respeta el Mute. La intensidad escala un poco con la duración pedida.
+    function clicTactilAudio(ms) {
+        if (!sonidoActivado) return;
+        desbloquearAudio();
+        if (!zzfxX) return;
+        try {
+            var t = zzfxX.currentTime;
+            var dur = 0.02;
+            var vol = Math.min(0.35, 0.15 + (ms || 10) * 0.012);
+            var osc = zzfxX.createOscillator();
+            var g = zzfxX.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(180, t);
+            osc.frequency.exponentialRampToValueAtTime(60, t + dur);
+            g.gain.setValueAtTime(vol, t);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+            osc.connect(g);
+            g.connect(zzfxX.destination);
+            osc.start(t);
+            osc.stop(t + dur + 0.01);
+        } catch (e) {}
+    }
+
     function vibrar(patron) {
         var conVibrate = false;
         try {
@@ -397,8 +452,15 @@ document.addEventListener("DOMContentLoaded", function () {
         } catch (e) { conVibrate = false; }
         if (conVibrate) {
             try { navigator.vibrate(patron); } catch (e) {}
+            return;
+        }
+        if (!esTactil) return;
+        clicTactilAudio(typeof patron === "number" ? patron : 10);
+        if (hayGestoActivo()) {
+            hapticoPendiente = false;
+            vibraSwitchIOS();
         } else {
-            vibraSwitchIOS(); // fallback iOS, pulso simple experimental
+            hapticoPendiente = true;
         }
     }
 
