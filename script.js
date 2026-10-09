@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Elementos de la interfaz (botones físicos)
     var btnStart = document.getElementById("btn-start");
     var btnBack = document.getElementById("btn-back");
+    var btnMute = document.getElementById("btn-mute");
     var dpadButtons = document.querySelectorAll(".dpad__btn");
 
     // Elementos del registro de récord (overlay + teclado virtual)
@@ -118,6 +119,216 @@ document.addEventListener("DOMContentLoaded", function () {
     // Iniciales: ["","",""] + cursor a la siguiente casilla vacía
     var iniciales = ["", "", ""];
     var cursorInicial = 0;
+
+    // =========================================================================
+    // Audio procedural 8-bit (Web Audio API + ZzFX para SFX + secuenciador propio para música)
+    // - Sonido ACTIVADO por defecto. Botón Mute (🔊/🔇) persiste en localStorage.
+    // - SFX: pega tus TXT de ZzFX Designer en el objeto SFX (ver comentarios PEGA AQUÍ).
+    // - MÚSICA: pega tus secuencias de notas en el objeto MUSICA (ver comentarios PEGA AQUÍ).
+    // =========================================================================
+    var MUTE_KEY = "snakegame_mute_v1";
+    var sonidoActivado = true;
+    try {
+        sonidoActivado = localStorage.getItem(MUTE_KEY) !== "1";
+    } catch (e) { }
+
+    // --- ZzFXMicro v1.4.0 by Frank Force (MIT, https://github.com/KilledByAPixel/ZzFX) ---
+    // Motor tiny que convierte arrays de números (tus TXT) en sonido 8-bit. No tocar.
+    var zzfxV = 0.3;
+    var zzfxX = null;
+    try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) zzfxX = new AC();
+    } catch (e) { zzfxX = null; }
+    var zzfx = function (p, k, b, e, r, t, q, D, u, y, v, z, l, E, A, F, c, w, m, B, N) {
+        if (!zzfxX) return;
+        if (p === undefined) p = 1; if (k === undefined) k = 0.05; if (b === undefined) b = 220;
+        if (e === undefined) e = 0; if (r === undefined) r = 0; if (t === undefined) t = 0.1;
+        if (q === undefined) q = 0; if (D === undefined) D = 1; if (u === undefined) u = 0;
+        if (y === undefined) y = 0; if (v === undefined) v = 0; if (z === undefined) z = 0;
+        if (l === undefined) l = 0; if (E === undefined) E = 0; if (A === undefined) A = 0;
+        if (F === undefined) F = 0; if (c === undefined) c = 0; if (w === undefined) w = 1;
+        if (m === undefined) m = 0; if (B === undefined) B = 0; if (N === undefined) N = 0;
+        var M = Math, d = 2 * M.PI, R = 44100, G = u *= 500 * d / R / R, C = b *= (1 - k + 2 * k * M.random(k = [])) * d / R,
+            g = 0, H = 0, a = 0, n = 1, I = 0, J = 0, f = 0, h = N < 0 ? -1 : 1, x = d * h * N * 2 / R, L = M.cos(x), Z = M.sin,
+            K = Z(x) / 4, O = 1 + K, X = -2 * L / O, Y = (1 - K) / O, P = (1 + h * L) / 2 / O, Q = -(h + L) / O, S = P, T = 0, U = 0, V = 0, W = 0;
+        e = R * e + 9; m *= R; r *= R; t *= R; c *= R; y *= 500 * d / R / R / R; A *= d / R; v *= d / R; z *= R; l = R * l | 0; p *= zzfxV;
+        for (h = e + m + r + t + c | 0; a < h; k[a++] = f * p)++J % (100 * F | 0) || (f = q ? 1 < q ? 2 < q ? 3 < q ? 4 < q ? (g / d % 1 < D / 2) * 2 - 1 : Z(g * g * g) : M.max(M.min(M.tan(g), 1), -1) : 1 - (2 * g / d % 2 + 2) % 2 : 1 - 4 * M.abs(M.round(g / d) - g / d) : Z(g), f = (l ? 1 - B + B * Z(d * a / l) : 1) * (4 < q ? f : (f < 0 ? -1 : 1) * M.abs(f) * M.abs(f) ** D) * (a < e ? a / e : a < e + m ? 1 - (a - e) / m * (1 - w) : a < e + m + r ? w : a < h - c ? (h - a - c) / t * w : 0), f = c ? f / 2 + (c > a ? 0 : (a < h - c ? 1 : (h - a) / c) * k[a - c | 0] / 2 / p) : f, N ? f = W = S * T + Q * (T = U) + P * (U = f) - Y * V - X * (V = W) : 0), x = (b += u += y) * M.cos(A * H++), g += x + x * E * (a * a * d % 2 - 1), n && ++n > z && (b += v, C += v, n = 0), !l || ++I % l || (b = C, u = G, n = n || 1);
+        X = zzfxX; p = X.createBuffer(1, h, R); p.getChannelData(0).set(k); b = X.createBufferSource(); b.buffer = p; b.connect(X.destination); b.start();
+    };
+
+    // -------------------------------------------------------------------------
+    // SFX: PEGA AQUÍ TUS TXT de ZzFX Designer
+    // Cómo pegar: en la app dale a tu sonido -> Export TXT -> copia los números
+    // y reemplaza SOLO el array de esa clave. Ejemplo:
+    //   comer: [0.8, 0, 800, 0.1, ...],   <-- tus números aquí dentro
+    // No borres el nombre de la clave ni la coma final. Si dejas un array vacío
+    // [], ese sonido simplemente no suena.
+    // -------------------------------------------------------------------------
+    var SFX = {
+        // Al comer comida
+        comer: [, , 618, .15, , .009, 1, 3.3, , , -247, .02, .01, , , , , .93, , , 163], // PEGA AQUÍ TU TXT de comer
+        // Al subir de nivel (cada 5 puntos)
+        nivel: [1.4, , 687, .03, .06, .3, , 1.3, , , 471, .07, , , , , .02, .98, .01], // PEGA AQUÍ TU TXT de nivel
+        // Al chocar / game over
+        choque: [, , 31, .06, .3, .4, 5, .1, 4, , , , , 1.1, , .2, , .45, .16], // PEGA AQUÍ TU TXT de choque
+        // Al lograr nuevo récord (fanfarria, suena 0.5s después del choque)
+        record: [.8, , 253, .38, .12, .41, , 1.8, , 26, , , .22, , 143, , .16, .98, .05, , 139], // PEGA AQUÍ TU TXT de récord
+        // Botón START / confirmar
+        start: [5, , 9, , , .04, , .7, , , , , , .2, 320, .2, , .78], // PEGA AQUÍ TU TXT de start
+        // Botón BACK / cancelar
+        back: [.5, , 53, , .02, .01, 3, 1.4, , , , , , , , , , .76, .1, , 242], // PEGA AQUÍ TU TXT de back
+        // Tecla del teclado virtual / escribir inicial
+        tecla: [, , 700, .03, .05, .12, 1, 1.4], // PEGA AQUÍ TU TXT de tecla
+        // Borrar inicial (⌫)
+        borrar: [, , 300, .04, .06, .14, 1, .9], // PEGA AQUÍ TU TXT de borrar
+        // Al guardar récord (ir a créditos)
+        guardar: [2.2, , 77, .07, , .04, 1, 3.7, , , 93, .04, , , , .1, .24, .65, , , 152], // PEGA AQUÍ TU TXT de guardar
+        // Movimiento UI genérico (pausa, créditos)
+        ui: [, , 520, .04, .06, .14, 1, 1.1] // PEGA AQUÍ TU TXT de ui
+    };
+
+    function desbloquearAudio() {
+        try {
+            if (zzfxX && zzfxX.state === "suspended") zzfxX.resume();
+        } catch (e) { }
+    }
+
+    function reproducirSFX(nombre) {
+        if (!sonidoActivado) return;
+        var preset = SFX[nombre];
+        if (!preset || !preset.length) return;
+        desbloquearAudio();
+        try {
+            zzfx.apply(null, preset);
+        } catch (e) { }
+    }
+
+    // -------------------------------------------------------------------------
+    // MÚSICA EN LOOP: PEGA AQUÍ TUS NOTAS
+    // Formato por pista: array de [NOTA, PASOS]. NOTA puede ser:
+    //   "C4","C#4","Db4","D4","E4","F4","F#4","G4","A4","B4","C5"... ("-" = silencio)
+    //   o un número = frecuencia directa en Hz. PASOS = duración en pasos.
+    // Para sacarlas de BeepBox: copia tu melodía/ bajo como lista de notas y
+    // pégala aquí reemplazando los arrays demo. Ajusta pasoMenu/pasoJuego (seg/paso).
+    // Lead = square (melodía), Bass = triangle (bajo). Volumen 0-0.2 aprox.
+    // -------------------------------------------------------------------------
+    var MUSICA = {
+        pasoMenu: 0.16,
+        pasoJuego: 0.125,
+        volLead: 0.05,
+        volBass: 0.08,
+        // Loop tranquilo para INICIO / CRÉDITOS / GAME_OVER / REGISTRO
+        menuLead: [["C5", 1], ["E5", 1], ["G5", 1], ["C6", 2], ["B5", 1], ["G5", 1], ["E5", 1], ["C5", 1], ["D5", 1], ["F5", 1], ["A5", 1], ["D6", 2], ["C6", 1], ["G5", 1], ["E5", 1], ["C5", 1]], // PEGA AQUÍ TU MELODÍA de menú
+        menuBass: [["C3", 2], ["G2", 2], ["A2", 2], ["G2", 2], ["F2", 2], ["G2", 2], ["C3", 2], ["G2", 2]], // PEGA AQUÍ TU BAJO de menú
+        // Loop más movido para JUGANDO
+        juegoLead: [["A4", 1], ["C5", 1], ["E5", 1], ["A5", 1], ["G5", 1], ["E5", 1], ["C5", 1], ["E5", 1], ["F5", 1], ["A5", 1], ["F5", 1], ["E5", 1], ["D5", 1], ["E5", 1], ["C5", 1], ["A4", 1]], // PEGA AQUÍ TU MELODÍA de juego
+        juegoBass: [["A2", 1], ["A2", 1], ["F2", 1], ["F2", 1], ["C3", 1], ["C3", 1], ["G2", 1], ["G2", 1], ["F2", 1], ["F2", 1], ["G2", 1], ["G2", 1], ["A2", 1], ["A2", 1], ["A2", 1], ["A2", 1]] // PEGA AQUÍ TU BAJO de juego
+    };
+    var musicaModo = null; // "menu" | "juego" | null
+    var musicaTimer = null;
+    var idxLead = 0, idxBass = 0;
+
+    function notaAFrec(nota) {
+        if (typeof nota === "number") return nota;
+        if (!nota || nota === "-") return 0;
+        var m = /^([A-G])([#b]?)(-?\d)$/.exec(String(nota).toUpperCase());
+        if (!m) return 0;
+        var base = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]];
+        if (m[2] === "#") base += 1;
+        if (m[2] === "B") base -= 1;
+        var oct = parseInt(m[3], 10);
+        var midi = (oct + 1) * 12 + base;
+        return 440 * Math.pow(2, (midi - 69) / 12);
+    }
+
+    function tocarNota(frec, dur, tipo, vol) {
+        if (!zzfxX || !sonidoActivado || !frec || frec <= 0) return;
+        try {
+            var t = zzfxX.currentTime;
+            var osc = zzfxX.createOscillator();
+            var g = zzfxX.createGain();
+            osc.type = tipo;
+            osc.frequency.setValueAtTime(frec, t);
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.exponentialRampToValueAtTime(Math.max(vol, 0.0002), t + 0.015);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(dur * 0.92, 0.05));
+            osc.connect(g);
+            g.connect(zzfxX.destination);
+            osc.start(t);
+            osc.stop(t + dur);
+        } catch (e) { }
+    }
+
+    function programarPasoMusica() {
+        if (!musicaModo || !sonidoActivado || !zzfxX) return;
+        var esMenu = musicaModo === "menu";
+        var lead = esMenu ? MUSICA.menuLead : MUSICA.juegoLead;
+        var bass = esMenu ? MUSICA.menuBass : MUSICA.juegoBass;
+        var paso = esMenu ? MUSICA.pasoMenu : MUSICA.pasoJuego;
+        if (!lead.length || !bass.length) return;
+        var nL = lead[idxLead % lead.length];
+        var nB = bass[idxBass % bass.length];
+        tocarNota(notaAFrec(nL[0]), paso * nL[1], "square", MUSICA.volLead);
+        tocarNota(notaAFrec(nB[0]), paso * nB[1], "triangle", MUSICA.volBass);
+        var avance = Math.min(nL[1], nB[1]);
+        // Avanzar cada pista según su duración (soporta notas de varios pasos)
+        pasoContadorLead += avance;
+        pasoContadorBass += avance;
+        if (pasoContadorLead >= nL[1]) { pasoContadorLead = 0; idxLead++; }
+        if (pasoContadorBass >= nB[1]) { pasoContadorBass = 0; idxBass++; }
+        musicaTimer = setTimeout(programarPasoMusica, Math.max(avance * paso * 1000, 30));
+    }
+    var pasoContadorLead = 0, pasoContadorBass = 0;
+
+    function iniciarMusica(modo) {
+        if (musicaModo === modo && musicaTimer) return;
+        detenerMusica();
+        if (!sonidoActivado) { musicaModo = modo; return; } // recuerda modo para reanudar al quitar mute
+        musicaModo = modo;
+        idxLead = 0; idxBass = 0; pasoContadorLead = 0; pasoContadorBass = 0;
+        desbloquearAudio();
+        programarPasoMusica();
+    }
+
+    function detenerMusica() {
+        musicaModo = null;
+        if (musicaTimer) { clearTimeout(musicaTimer); musicaTimer = null; }
+    }
+
+    function actualizarMusicaPorEstado() {
+        if (!sonidoActivado) return;
+        if (estado === "JUGANDO") {
+            iniciarMusica("juego");
+        } else if (estado === "PAUSA") {
+            detenerMusica();
+        } else {
+            // INICIO, GAME_OVER, REGISTRO, CREDITOS comparten loop de menú
+            iniciarMusica("menu");
+        }
+    }
+
+    function actualizarBotonMute() {
+        if (!btnMute) return;
+        btnMute.textContent = sonidoActivado ? "🔊" : "🔇";
+        btnMute.setAttribute("aria-pressed", sonidoActivado ? "false" : "true");
+        btnMute.setAttribute("aria-label", sonidoActivado ? "Silenciar sonido" : "Activar sonido");
+    }
+
+    function alternarMute() {
+        sonidoActivado = !sonidoActivado;
+        try {
+            localStorage.setItem(MUTE_KEY, sonidoActivado ? "0" : "1");
+        } catch (e) { }
+        actualizarBotonMute();
+        if (!sonidoActivado) {
+            detenerMusica();
+        } else {
+            desbloquearAudio();
+            reproducirSFX("ui");
+            actualizarMusicaPorEstado();
+        }
+    }
 
     // =========================================================================
     // Inicialización del juego y reinicio
@@ -202,6 +413,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 top5 = cargarTop();
                 var cabe = cabeEnTop(score);
                 ultimoRecord = { esNuevo: cabe.cabe, posicion: cabe.posicion, puntos: score };
+                reproducirSFX("choque");
+                if (cabe.cabe) {
+                    setTimeout(function () { reproducirSFX("record"); }, 500);
+                }
                 dibujarGameOver();
                 animacion_timer = setInterval(function () {
                     parpadeo_visible = !parpadeo_visible;
@@ -225,6 +440,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 dibujarCreditos();
                 break;
         }
+        actualizarMusicaPorEstado();
     }
 
     // =========================================================================
@@ -461,9 +677,11 @@ document.addEventListener("DOMContentLoaded", function () {
             tail = { x: nx, y: ny };
             score++;
             create_food();
+            reproducirSFX("comer");
             // Cada 5 puntos: +5% velocidad compuesto (sin tope)
             if (score % 5 === 0) {
                 actualizarVelocidad();
+                reproducirSFX("nivel");
             }
         } else {
             tail = snake_array.pop();
@@ -602,6 +820,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (cursorInicial < 0) cursorInicial = 0;
         if (cursorInicial > 2) cursorInicial = 2;
         iniciales[cursorInicial] = l;
+        reproducirSFX("tecla");
         if (cursorInicial < 2) {
             // Avanzar a la siguiente casilla vacía si es posible
             var siguiente = cursorInicial + 1;
@@ -625,6 +844,7 @@ document.addEventListener("DOMContentLoaded", function () {
             cursorInicial--;
             iniciales[cursorInicial] = "";
         }
+        reproducirSFX("borrar");
         renderIniciales();
     }
 
@@ -645,6 +865,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var puntos = ultimoRecord.puntos || score;
         top5 = guardarRecord(nombre, puntos);
         ultimoRecord = { esNuevo: false, posicion: -1, puntos: puntos };
+        reproducirSFX("guardar");
         cambiarEstado("CREDITOS");
     }
 
@@ -652,37 +873,49 @@ document.addEventListener("DOMContentLoaded", function () {
     // Acciones de Botones Físicos / Entrada
     // =========================================================================
     function accionBotonVerde() {
+        desbloquearAudio();
         if (estado === "INICIO") {
+            reproducirSFX("start");
             reiniciarJuego();
             cambiarEstado("JUGANDO");
         } else if (estado === "JUGANDO") {
+            reproducirSFX("ui");
             cambiarEstado("PAUSA");
         } else if (estado === "PAUSA") {
+            reproducirSFX("start");
             cambiarEstado("JUGANDO");
         } else if (estado === "GAME_OVER") {
             if (ultimoRecord.esNuevo) {
+                reproducirSFX("ui");
                 cambiarEstado("REGISTRO");
             } else {
+                reproducirSFX("start");
                 reiniciarJuego();
                 cambiarEstado("JUGANDO");
             }
         } else if (estado === "REGISTRO") {
             intentarGuardarRegistro();
         } else if (estado === "CREDITOS") {
+            reproducirSFX("ui");
             cambiarEstado("INICIO");
         }
     }
 
     function accionBotonRojo() {
+        desbloquearAudio();
         if (estado === "INICIO") {
+            reproducirSFX("ui");
             cambiarEstado("CREDITOS");
         } else if (estado === "CREDITOS") {
+            reproducirSFX("back");
             cambiarEstado("INICIO");
         } else if (estado === "REGISTRO") {
             // BACK en registro: descartar (no guardar) e ir al menú
+            reproducirSFX("back");
             ultimoRecord = { esNuevo: false, posicion: -1, puntos: ultimoRecord.puntos };
             cambiarEstado("INICIO");
         } else if (estado === "JUGANDO" || estado === "PAUSA" || estado === "GAME_OVER") {
+            reproducirSFX("back");
             cambiarEstado("INICIO");
         }
     }
@@ -794,6 +1027,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("keydown", function (e) {
         var key = e.which || e.keyCode;
 
+        // M para mute en cualquier estado (salvo escribiendo iniciales con M)
+        if ((e.key === "m" || e.key === "M") && estado !== "REGISTRO") {
+            e.preventDefault();
+            desbloquearAudio();
+            alternarMute();
+            return;
+        }
+
         // En REGISTRO las letras son iniciales, no direcciones (A/D/W/S chocan)
         if (estado === "REGISTRO") {
             var k = e.key || "";
@@ -880,6 +1121,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Botón Mute + desbloqueo de audio en el primer gesto (requisito móvil)
+    actualizarBotonMute();
+    if (btnMute) {
+        btnMute.addEventListener("pointerdown", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            desbloquearAudio();
+            alternarMute();
+        });
+        btnMute.addEventListener("click", function (e) {
+            e.preventDefault();
+            alternarMute();
+        });
+    }
+    document.addEventListener("pointerdown", function desbloquearUnaVez() {
+        desbloquearAudio();
+        if (sonidoActivado && !musicaModo) actualizarMusicaPorEstado();
+    }, { once: true });
 
     // Iniciar en la pantalla de bienvenida
     cambiarEstado("INICIO");
