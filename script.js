@@ -203,9 +203,9 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             if (zzfxX && typeof zzfxX.state === "string" && zzfxX.state !== "running") {
                 var pr = zzfxX.resume();
-                if (pr && pr.catch) pr.catch(function () {});
+                if (pr && pr.catch) pr.catch(function () { });
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     function reproducirSFX(nombre) {
@@ -220,7 +220,6 @@ document.addEventListener("DOMContentLoaded", function () {
             audioAnotarError("sfx " + nombre + ": " + (e && e.message || e));
         }
     }
-
     // -------------------------------------------------------------------------
     // MÚSICA EN LOOP: PEGA AQUÍ TUS NOTAS
     // Formato por pista: array de [NOTA, PASOS]. NOTA puede ser:
@@ -371,55 +370,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // =========================================================================
     // Hápticos en botones (cruceta, START, BACK, Mute). NO en eventos del juego.
-    // A) navigator.vibrate (Android Chrome/Edge/Samsung).
-    // B) iOS (sin vibrate): hack del <label> con switch (iOS 17.4–26.4; Apple lo
-    //    cerró en 26.5) + un "clic" de audio cortito como respaldo para todos.
+    // A) navigator.vibrate (Android Chrome/Edge/Samsung). Pulsos de 30 ms o más:
+    //    por debajo de ~20 ms muchos motores no alcanzan a arrancar y no se siente.
+    // B) iOS: Safari no tiene API de vibración (el hack del switch lo cerró Apple
+    //    en iOS 26.5), así que suena un "clic" de audio cortito como respaldo.
     // Solo en pantallas táctiles: en escritorio no hace nada.
     // =========================================================================
     var esTactil = false;
     try {
         esTactil = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
     } catch (e) { esTactil = false; }
-
-    // Hack iOS: hay que hacer click() en el LABEL (no en el input) para que
-    // iOS lo trate como toque real al switch y dispare el háptico del sistema.
-    var vibraLabelEl = null;
-    function vibraSwitchIOS() {
-        try {
-            if (!vibraLabelEl) {
-                vibraLabelEl = document.createElement("label");
-                vibraLabelEl.setAttribute("aria-hidden", "true");
-                vibraLabelEl.setAttribute("style", "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;");
-                var input = document.createElement("input");
-                input.type = "checkbox";
-                input.setAttribute("switch", "");
-                input.tabIndex = -1;
-                vibraLabelEl.appendChild(input);
-                document.body.appendChild(vibraLabelEl);
-            }
-            vibraLabelEl.click();
-        } catch (e) {}
-    }
-
-    // iOS solo acepta el click simulado dentro de un gesto válido (pointerup /
-    // touchend / click; pointerdown táctil no cuenta). Si al llamar vibrar() aún
-    // no hay gesto activo (cruceta en pointerdown), se deja pendiente y se
-    // dispara al soltar el dedo.
-    var hapticoPendiente = false;
-    function hayGestoActivo() {
-        try {
-            if (navigator.userActivation) return navigator.userActivation.isActive;
-        } catch (e) {}
-        return false;
-    }
-    function dispararHapticoPendiente() {
-        if (!hapticoPendiente) return;
-        hapticoPendiente = false;
-        vibraSwitchIOS();
-    }
-    document.addEventListener("pointerup", dispararHapticoPendiente, true);
-    document.addEventListener("touchend", dispararHapticoPendiente, true);
-    document.addEventListener("pointercancel", function () { hapticoPendiente = false; }, true);
 
     // Respaldo audible: "tic" grave de ~20 ms que se siente como un clic físico.
     // Respeta el Mute. La intensidad escala un poco con la duración pedida.
@@ -430,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             var t = zzfxX.currentTime;
             var dur = 0.02;
-            var vol = Math.min(0.35, 0.15 + (ms || 10) * 0.012);
+            var vol = Math.min(0.35, 0.15 + (ms || 30) * 0.005);
             var osc = zzfxX.createOscillator();
             var g = zzfxX.createGain();
             osc.type = "sine";
@@ -442,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function () {
             g.connect(zzfxX.destination);
             osc.start(t);
             osc.stop(t + dur + 0.01);
-        } catch (e) {}
+        } catch (e) { }
     }
 
     function vibrar(patron) {
@@ -451,17 +411,11 @@ document.addEventListener("DOMContentLoaded", function () {
             conVibrate = ("vibrate" in navigator) && typeof navigator.vibrate === "function";
         } catch (e) { conVibrate = false; }
         if (conVibrate) {
-            try { navigator.vibrate(patron); } catch (e) {}
+            try { navigator.vibrate(patron); } catch (e) { }
             return;
         }
         if (!esTactil) return;
-        clicTactilAudio(typeof patron === "number" ? patron : 10);
-        if (hayGestoActivo()) {
-            hapticoPendiente = false;
-            vibraSwitchIOS();
-        } else {
-            hapticoPendiente = true;
-        }
+        clicTactilAudio(typeof patron === "number" ? patron : 30);
     }
 
     // -------------------------------------------------------------------------
@@ -490,7 +444,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!audioDebugEl) return;
                 var ctxEstado = zzfxX ? (zzfxX.state || "?") : "NULL (sin crear)";
                 var sr = "";
-                try { sr = zzfxX ? ", " + zzfxX.sampleRate + "Hz" : ""; } catch (e) {}
+                try { sr = zzfxX ? ", " + zzfxX.sampleRate + "Hz" : ""; } catch (e) { }
                 audioDebugEl.textContent =
                     "ctx=" + ctxEstado + sr +
                     " | mute=" + (sonidoActivado ? "OFF" : "ON") +
@@ -1115,7 +1069,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnStart.addEventListener("pointerdown", function (e) {
             e.preventDefault();
             btnStart.classList.add("btn--activo");
-            vibrar(15);
+            vibrar(40);
             accionBotonVerde();
         });
         btnStart.addEventListener("pointerup", function () {
@@ -1130,7 +1084,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btnBack.addEventListener("pointerdown", function (e) {
             e.preventDefault();
             btnBack.classList.add("btn--activo");
-            vibrar(15);
+            vibrar(40);
             accionBotonRojo();
         });
         btnBack.addEventListener("pointerup", function () {
@@ -1147,7 +1101,7 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.addEventListener("pointerdown", function (e) {
             e.preventDefault();
             btn.classList.add("dpad__btn--activo");
-            vibrar(12);
+            vibrar(40);
             if (estado === "REGISTRO") {
                 if (dir === "left") moverCursor(-1);
                 else if (dir === "right") moverCursor(1);
@@ -1305,7 +1259,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (btnMute) {
         btnMute.addEventListener("click", function (e) {
             e.preventDefault();
-            vibrar(10);
+            vibrar(40);
             alternarMute();
         });
     }
