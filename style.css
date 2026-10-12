@@ -132,6 +132,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+}
+
+/* Amplía el área táctil a 44x44 sin cambiar el tamaño visible del botón */
+.btn-mute::after {
+    content: "";
+    position: absolute;
+    inset: -8px -3px;
 }
 
 .btn-mute:active {
@@ -225,8 +233,8 @@ body {
    -------------------------------------------------------------------------- */
 .dpad {
     display: grid;
-    grid-template-columns: repeat(3, 40px);
-    grid-template-rows: repeat(3, 40px);
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
     position: relative;
     filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.45));
 }
@@ -491,20 +499,33 @@ body {
 }
 
 .registro__ayuda {
-    font-size: 6px;
+    font-size: 9px;
     color: var(--pantalla-tenue);
     margin-bottom: 0;
+}
+
+/* Los hijos de la tarjeta no se encogen; solo el teclado cede altura */
+.registro__tarjeta > * {
+    flex-shrink: 0;
+}
+
+/* 28 teclas = 4 filas de 7. Cada fila mide 44px (área táctil recomendada) y
+   solo baja de ahí si la pantalla de la consola es demasiado pequeña. */
+.registro__tarjeta > .registro__teclado {
+    flex-shrink: 1;
+    min-height: 0;
 }
 
 .registro__teclado {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(4, minmax(0, 44px));
     gap: 3px;
     margin-bottom: 2px;
 }
 
 .registro__tecla {
-    min-height: 26px;
+    min-height: 0;
     font-family: var(--font-retro);
     font-size: 9px;
     color: var(--pantalla-fondo);
@@ -524,18 +545,20 @@ body {
 }
 
 .registro__tecla--borrar {
-    grid-column: span 2;
+    /* ⌫ no existe en la fuente retro: se dibuja con la del sistema, más grande */
+    font-family: system-ui, sans-serif;
+    font-size: 18px;
     background: var(--pantalla-tenue);
 }
 
 .registro__acciones {
     display: flex;
-    flex-direction: column;
     gap: 4px;
 }
 
 .registro__btn {
     font-family: var(--font-retro);
+    flex: 1;
     font-size: 8px;
     padding: 7px 6px;
     border-radius: 5px;
@@ -578,11 +601,6 @@ body {
         border-width: 2px;
     }
 
-    .dpad {
-        grid-template-columns: repeat(3, 36px);
-        grid-template-rows: repeat(3, 36px);
-    }
-
     .btn-circular {
         width: 44px;
         height: 44px;
@@ -605,11 +623,6 @@ body {
         gap: 2px;
     }
 
-    .registro__tecla {
-        min-height: 24px;
-        font-size: 8px;
-    }
-
     .registro__letra {
         width: 30px;
         height: 34px;
@@ -630,15 +643,5 @@ body {
         max-width: 340px;
         padding: 12px 12px 16px;
         gap: 10px;
-    }
-
-    .dpad {
-        grid-template-columns: repeat(3, 32px);
-        grid-template-rows: repeat(3, 32px);
-    }
-
-    .btn-circular {
-        width: 38px;
-        height: 38px;
     }
 }
