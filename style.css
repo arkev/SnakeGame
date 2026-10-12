@@ -11,10 +11,15 @@
     --pantalla-marco: #242528;
     --pantalla-bisel: #7a7e85;
     --pantalla-fondo: #9fb87a;
+    --pantalla-fondo-velo: rgba(159, 184, 122, 0.97);
     --pantalla-pixel: #040207;
+    --pantalla-tenue: #3a4628;
     --dpad-color: #1e1f23;
     --dpad-detalle: #3d3f46;
     --btn-cuerpo: #1e1f23;
+    --btn-borde: #141518;
+    --pieza-oscura: #212225;
+    --foco: #ffd54a;
     --btn-verde: #2ecc71;
     --btn-verde-glow: rgba(46, 204, 113, 0.4);
     --btn-rojo: #e74c3c;
@@ -49,6 +54,22 @@ body {
     justify-content: center;
     align-items: center;
     padding: 16px;
+}
+
+/* Foco visible solo al navegar con teclado (no al tocar o hacer clic) */
+:focus-visible {
+    outline: 2px solid var(--foco);
+    outline-offset: 2px;
+}
+
+/* Texto solo para lectores de pantalla */
+.visualmente-oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 /* --------------------------------------------------------------------------
@@ -97,9 +118,9 @@ body {
     height: 32px;
     font-size: 14px;
     line-height: 1;
-    background: #212225;
+    background: var(--pieza-oscura);
     color: #fff;
-    border: 2px solid #141518;
+    border: 2px solid var(--btn-borde);
     border-radius: 8px;
     cursor: pointer;
     box-shadow:
@@ -169,10 +190,7 @@ body {
 .consola__pantalla-cristal::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     pointer-events: none;
     background: linear-gradient(
         rgba(255, 255, 255, 0.04) 50%, 
@@ -187,8 +205,8 @@ body {
     width: 100%;
     height: auto;
     aspect-ratio: 1 / 1;
-    image-rendering: pixelated;
     image-rendering: crisp-edges;
+    image-rendering: pixelated;
     background-color: var(--pantalla-fondo);
 }
 
@@ -216,7 +234,6 @@ body {
 .dpad__btn {
     background-color: var(--dpad-color);
     border: none;
-    outline: none;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -326,9 +343,8 @@ body {
     height: 48px;
     border-radius: 50%;
     background: linear-gradient(145deg, #28292d, #191a1d);
-    border: 2px solid #141518;
+    border: 2px solid var(--btn-borde);
     cursor: pointer;
-    outline: none;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -391,68 +407,12 @@ body {
 .consola__altavoz-ranura {
     width: 6px;
     height: 28px;
-    background-color: #212225;
+    background-color: var(--pieza-oscura);
     border-radius: 3px;
     box-shadow: 
         inset 0 1px 2px rgba(0, 0, 0, 0.8),
         0 1px 1px rgba(255, 255, 255, 0.08);
     transform: rotate(20deg);
-}
-
-/* --------------------------------------------------------------------------
-   Ajustes Responsivos para Pantallas Pequeñas y Móviles
-   -------------------------------------------------------------------------- */
-@media (max-width: 480px) {
-    body {
-        padding: 8px;
-    }
-
-    .consola {
-        padding: 18px 14px 22px;
-        border-radius: 32px 32px 38px 38px;
-        gap: 16px;
-    }
-
-    .consola__pantalla-marco {
-        padding: 8px;
-        border-width: 2px;
-    }
-
-    .dpad {
-        grid-template-columns: repeat(3, 36px);
-        grid-template-rows: repeat(3, 36px);
-    }
-
-    .btn-circular {
-        width: 44px;
-        height: 44px;
-    }
-
-    .botones-accion {
-        gap: 14px;
-    }
-}
-
-@media (max-height: 700px) and (orientation: landscape) {
-    body {
-        padding: 6px;
-    }
-
-    .consola {
-        max-width: 340px;
-        padding: 12px 12px 16px;
-        gap: 10px;
-    }
-
-    .dpad {
-        grid-template-columns: repeat(3, 32px);
-        grid-template-rows: repeat(3, 32px);
-    }
-
-    .btn-circular {
-        width: 38px;
-        height: 38px;
-    }
 }
 
 /* --------------------------------------------------------------------------
@@ -466,7 +426,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 6px;
-    background: rgba(159, 184, 122, 0.97);
+    background: var(--pantalla-fondo-velo);
 }
 
 .registro[hidden] {
@@ -532,7 +492,7 @@ body {
 
 .registro__ayuda {
     font-size: 6px;
-    color: #3a4628;
+    color: var(--pantalla-tenue);
     margin-bottom: 0;
 }
 
@@ -565,7 +525,7 @@ body {
 
 .registro__tecla--borrar {
     grid-column: span 2;
-    background: #3a4628;
+    background: var(--pantalla-tenue);
 }
 
 .registro__acciones {
@@ -584,6 +544,11 @@ body {
     touch-action: manipulation;
 }
 
+.registro__btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .registro__btn--guardar {
     background: var(--pantalla-pixel);
     color: var(--pantalla-fondo);
@@ -594,7 +559,39 @@ body {
     color: var(--pantalla-pixel);
 }
 
+/* --------------------------------------------------------------------------
+   Ajustes Responsivos para Pantallas Pequeñas y Móviles
+   -------------------------------------------------------------------------- */
 @media (max-width: 480px) {
+    body {
+        padding: 8px;
+    }
+
+    .consola {
+        padding: 18px 14px 22px;
+        border-radius: 32px 32px 38px 38px;
+        gap: 16px;
+    }
+
+    .consola__pantalla-marco {
+        padding: 8px;
+        border-width: 2px;
+    }
+
+    .dpad {
+        grid-template-columns: repeat(3, 36px);
+        grid-template-rows: repeat(3, 36px);
+    }
+
+    .btn-circular {
+        width: 44px;
+        height: 44px;
+    }
+
+    .botones-accion {
+        gap: 14px;
+    }
+
     .registro {
         padding: 4px;
     }
@@ -605,7 +602,6 @@ body {
     }
 
     .registro__teclado {
-        grid-template-columns: repeat(7, 1fr);
         gap: 2px;
     }
 
@@ -622,5 +618,27 @@ body {
 
     .registro__btn {
         padding: 6px;
+    }
+}
+
+@media (max-height: 700px) and (orientation: landscape) {
+    body {
+        padding: 6px;
+    }
+
+    .consola {
+        max-width: 340px;
+        padding: 12px 12px 16px;
+        gap: 10px;
+    }
+
+    .dpad {
+        grid-template-columns: repeat(3, 32px);
+        grid-template-rows: repeat(3, 32px);
+    }
+
+    .btn-circular {
+        width: 38px;
+        height: 38px;
     }
 }

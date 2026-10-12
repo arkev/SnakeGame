@@ -99,14 +99,14 @@ stateDiagram-v2
 - **CSS3**: Diseño retro realista mediante degradados, sombras multicapa, CSS Grid para la cruceta y consultas de medios responsive.
 - **JavaScript Vanilla**: Lógica de máquina de estados (`INICIO/JUGANDO/PAUSA/GAME_OVER/REGISTRO/CREDITOS`), velocidad progresiva, récords en `localStorage`, teclado virtual, audio procedural (ZzFX + secuenciador), manejo de eventos pointer (táctiles y mouse), gestión de colisiones y bucle de juego.
 - **Google Fonts**: Tipografía pixelada estilo 8-bit (*Press Start 2P*) + iconos (*Material Symbols Rounded* para Mute).
-- **ZzFXMicro v1.4.0** (MIT, Frank Force): motor tiny vendoreado en `script.js` para SFX sin archivos.
+- **ZzFXMicro v1.4.0** (MIT, Frank Force): motor tiny vendoreado en `js/audio.js` para SFX sin archivos.
 
 ---
 
 ## 🔊 Audio: cómo pegar tus sonidos
 
-- **SFX**: diseña en [ZzFX Designer](https://killedbyapixel.github.io/ZzFX/) → Export TXT → en `script.js` busca `var SFX = {` y reemplaza solo el array de cada clave (`comer`, `nivel`, `choque`, `record`, `start`, `back`, `tecla`, `borrar`, `guardar`, `ui`). Con `[]` ese sonido queda mudo. Trae presets demo.
-- **Música**: compone en [BeepBox](https://www.beepbox.co/) → en `script.js` busca `var MUSICA = {` y pega tus notas como `[["C5",1],["E5",1],["-",1]]` en `menuLead/menuBass` y `juegoLead/juegoBass`. Ajusta `pasoMenu/pasoJuego`. Trae melodías demo.
+- **SFX**: diseña en [ZzFX Designer](https://killedbyapixel.github.io/ZzFX/) → Export TXT → en `js/audio.js` busca `const SFX = {` y reemplaza solo el array de cada clave (`comer`, `nivel`, `choque`, `record`, `start`, `back`, `tecla`, `borrar`, `guardar`, `ui`). Con `[]` ese sonido queda mudo. Trae presets demo.
+- **Música**: compone en [BeepBox](https://www.beepbox.co/) → en `js/audio.js` busca `const MUSICA = {` y pega tus notas como `[["C5",1],["E5",1],["-",1]]` en `menuLead/menuBass` y `juegoLead/juegoBass`. Ajusta `pasoMenu/pasoJuego`. Trae melodías demo.
 
 ---
 
@@ -151,7 +151,12 @@ SnakeGame/
 │   └── snakeGame.png     # Icono de la aplicación para dispositivos móviles
 ├── index.html            # Estructura de la consola, botón Mute, canvas, overlay de registro + teclado virtual, meta tags e iconos
 ├── style.css             # Estilos de la carcasa, pantalla, cruceta, registro compacto sin scroll, botón Mute y responsive
-├── script.js             # Máquina de estados, velocidad progresiva, Top 5 localStorage, registro de iniciales, audio procedural (SFX+Música+Mute) y canvas
+├── js/                   # Módulos ES (se cargan desde script.js con import)
+│   ├── audio.js          # Audio procedural: SFX (ZzFX), música en loop y Mute
+│   ├── records.js        # Top 5 en localStorage
+│   ├── dibujo.js         # Pantallas del canvas (inicio, juego, pausa, game over, créditos)
+│   └── entrada.js        # Botones, cruceta, teclado, hápticos y registro de iniciales
+├── script.js             # Archivo principal: reglas del juego, velocidad progresiva y máquina de estados
 └── README.md             # Documentación completa del proyecto
 ```
 

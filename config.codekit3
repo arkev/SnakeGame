@@ -67,6 +67,50 @@
       "oAP" : "\/build\/index.html",
       "oF" : 0
     },
+    "\/js\/audio.js" : {
+      "bF" : 0,
+      "ft" : 64,
+      "ma" : 0,
+      "mi" : 2,
+      "oA" : 1,
+      "oAP" : "\/build\/js\/audio.js",
+      "oF" : 0,
+      "sC" : 3,
+      "tS" : 0
+    },
+    "\/js\/dibujo.js" : {
+      "bF" : 0,
+      "ft" : 64,
+      "ma" : 0,
+      "mi" : 2,
+      "oA" : 0,
+      "oAP" : "\/build\/js\/dibujo.js",
+      "oF" : 0,
+      "sC" : 3,
+      "tS" : 0
+    },
+    "\/js\/entrada.js" : {
+      "bF" : 0,
+      "ft" : 64,
+      "ma" : 0,
+      "mi" : 2,
+      "oA" : 1,
+      "oAP" : "\/build\/js\/entrada.js",
+      "oF" : 0,
+      "sC" : 3,
+      "tS" : 0
+    },
+    "\/js\/records.js" : {
+      "bF" : 0,
+      "ft" : 64,
+      "ma" : 0,
+      "mi" : 2,
+      "oA" : 1,
+      "oAP" : "\/build\/js\/records.js",
+      "oF" : 0,
+      "sC" : 3,
+      "tS" : 0
+    },
     "\/README.md" : {
       "cB" : 0,
       "cS" : 0,
@@ -94,7 +138,7 @@
       "oA" : 0,
       "oAP" : "\/build\/script.js",
       "oF" : 0,
-      "sC" : 3,
+      "sC" : 0,
       "tS" : 0
     },
     "\/style.css" : {
