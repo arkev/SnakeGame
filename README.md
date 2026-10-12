@@ -1,4 +1,4 @@
-# 🎮 Snake Game - Consola Retro
+# 🎮 Snake Retro Game
 
 Una versión mejorada del legendario juego de la serpiente, renderizada dentro de una **carcasa de consola retro** inspirada en el diseño icónico de la **Game Boy** y los teléfonos clásicos **Nokia**.
 

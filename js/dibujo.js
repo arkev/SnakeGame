@@ -42,15 +42,17 @@ export function dibujarInicio(top5, parpadeoVisible) {
     ctx.fillStyle = COLOR_PIXEL;
     ctx.font = fuente(36, true);
     ctx.textAlign = "center";
-    ctx.fillText("SNAKE", ancho / 2, 130);
+    ctx.fillText("SNAKE", ancho / 2, 108);
+    ctx.font = fuente(16, true);
+    ctx.fillText("RETRO GAME", ancho / 2, 136);
 
     // Mejor puntaje local (HI-SCORE)
     ctx.font = fuente(11);
     if (top5.length > 0) {
-        ctx.fillText("HI: " + top5[0].nombre + " " + top5[0].puntos, ancho / 2, 160);
+        ctx.fillText("HI: " + top5[0].nombre + " " + top5[0].puntos, ancho / 2, 166);
     } else {
         ctx.fillStyle = COLOR_TENUE;
-        ctx.fillText("SIN RÉCORDS", ancho / 2, 160);
+        ctx.fillText("SIN RÉCORDS", ancho / 2, 166);
         ctx.fillStyle = COLOR_PIXEL;
     }
 
@@ -186,7 +188,9 @@ export function dibujarCreditos(top5) {
     ctx.stroke();
 
     ctx.font = fuente(10);
-    ctx.fillText("SNAKE GAME RETRO", ancho / 2, 92);
+    ctx.fillText("SNAKE", ancho / 2, 85);
+    ctx.font = fuente(8);
+    ctx.fillText("RETRO GAME", ancho / 2, 98);
 
     ctx.font = fuente(8);
     ctx.fillStyle = COLOR_TENUE_OSCURO;

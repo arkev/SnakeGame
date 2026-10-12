@@ -1,5 +1,5 @@
 // =============================================================================
-// Snake Game - archivo principal: reglas del juego y máquina de estados.
+// Snake Retro Game - archivo principal: reglas del juego y máquina de estados.
 // El resto está repartido en módulos:
 //   js/records.js  Top 5 en localStorage
 //   js/audio.js    SFX, música y Mute
