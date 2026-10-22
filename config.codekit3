@@ -7,7 +7,7 @@
       "uuidString" : "82A8E3DD-D2AE-4400-B549-ED3CC0DC4ED3"
     }
   ],
-  "creatorBuild" : "36780",
+  "creatorBuild" : "36870",
   "files" : {
     "\/.gitattributes" : {
       "cB" : 0,
@@ -1384,7 +1384,9 @@
       "autoOutputPathReplace1" : "",
       "autoOutputPathReplace2" : "",
       "autoOutputPathStyle" : 0,
-      "pluginMask" : 52780316221407
+      "pluginMask" : 52780316221407,
+      "prettyPrinted" : 0,
+      "useMultipass" : 0
     },
     "languageDefaultsTS" : {
       "autoOutputAction" : 0,
@@ -1407,6 +1409,16 @@
     "languageDefaultsUserDefined" : [
 
     ],
+    "languageDefaultsWEBP" : {
+      "autoOutputAction" : 0,
+      "autoOutputPathFilenamePattern" : "*.webp",
+      "autoOutputPathRelativePath" : "",
+      "autoOutputPathReplace1" : "",
+      "autoOutputPathReplace2" : "",
+      "autoOutputPathStyle" : 0,
+      "optimizationPresetUUID" : "lpckwebp-default",
+      "rgbQuality" : 75
+    },
     "npmAbbreviatedPath" : "",
     "npmCreatePackageLock" : 1,
     "npmInstallOptionalDependencies" : 0,
